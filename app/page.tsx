@@ -12,7 +12,7 @@ export default function Home() {
           throw new Error('Network response was not ok');
         }
         const result = await response.json();
-        setData(result.message);
+        setData(result);
       } catch (error) {
         console.error('Error fetching data:', error);
       }

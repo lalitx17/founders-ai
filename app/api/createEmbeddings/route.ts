@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
+import { createEmbeddings } from '@/lib/embeddings';
 
-import { paulEssays } from "@/data/paul_graham_essays";
-
-import { createEmbeddings } from "./embeddings";
-
-
-export async function GET(req: NextRequest, res: NextResponse) {
-    const embeds = createEmbeddings();
-    return NextResponse.json({message: embeds});
+export async function GET(req: NextRequest) {
+  try {
+    const embeddings = await createEmbeddings();
+    return NextResponse.json(embeddings);
+  } catch (error) {
+    console.error("Error generating embeddings:", error);
+    return NextResponse.json({ error: 'Failed to generate embeddings' }, { status: 500 });
+  }
 }
