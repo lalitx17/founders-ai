@@ -1,4 +1,4 @@
-[
+export const paulEssays = [
   {
     "title": "Is it Worth Being Wise?",
     "url": "https://www.paulgraham.com/wisdom.html",
