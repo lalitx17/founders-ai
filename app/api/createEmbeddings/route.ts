@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createEmbeddings } from '@/lib/embeddings';
+import { embeddingFunction } from '@/lib/embeddings';
 
 export async function GET(req: NextRequest) {
   try {
-    const embeddings = await createEmbeddings();
+    const embeddings = await embeddingFunction(["nothing"]);
     return NextResponse.json(embeddings);
   } catch (error) {
     console.error("Error generating embeddings:", error);
