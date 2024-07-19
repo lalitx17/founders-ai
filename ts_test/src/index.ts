@@ -1,4 +1,4 @@
-import { initChroma,addToChroma, queryChroma } from "./chroma-client.js";
+import { initChroma,addToChroma, queryChroma, deleteAllFromChroma } from "./chroma-client.js";
 import { paulEssays } from "./data/paul_graham_essays.js";
 
 
@@ -10,12 +10,7 @@ async function main(){
     const {client, collection} = await initChroma();
     console.log('Chroma initialized:', {client, collection});
 
-
-    // const content = paulEssays[5].content.split('/n');
-    
-    
-
-    const content = [paulEssays[5].content];
+    const content = [paulEssays[5].title+paulEssays[5].content];
 
     const metadatas = [];
     const metadataObject = {
@@ -28,9 +23,12 @@ async function main(){
     await addToChroma(content, metadatas);
     console.log('Text added to Chroma collection');
 
-    const queryText = "What does Paul Graham write about?";
+    const queryText = "what advantage does apple had?";
     const results = await queryChroma(queryText);
     console.log('Query results:', results);
+    console.log(results.metadatas);
+
+    // await deleteAllFromChroma();
 
 }
 

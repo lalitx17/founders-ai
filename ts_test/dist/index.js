@@ -4,7 +4,7 @@ const google = paulEssays[5].content;
 async function main() {
     const { client, collection } = await initChroma();
     console.log('Chroma initialized:', { client, collection });
-    const content = [paulEssays[5].content];
+    const content = [paulEssays[5].title + paulEssays[5].content];
     const metadatas = [];
     const metadataObject = {
         title: paulEssays[5].title,
@@ -13,9 +13,10 @@ async function main() {
     metadatas.push(metadataObject);
     await addToChroma(content, metadatas);
     console.log('Text added to Chroma collection');
-    const queryText = "What does Paul Graham write about?";
+    const queryText = "what advantage does apple had?";
     const results = await queryChroma(queryText);
     console.log('Query results:', results);
+    console.log(results.metadatas);
 }
 main().catch(console.error);
 //# sourceMappingURL=index.js.map

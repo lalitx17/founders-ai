@@ -1,5 +1,4 @@
 import { ChromaClient } from "chromadb";
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 import { Document } from "langchain/document";
 let client = null;
 let collection = null;
@@ -11,10 +10,14 @@ const customEmbeddingFunction = {
         return embeddings.map(embedding => Array.from(embedding.data));
     }
 };
-const textSplitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 1000,
-    chunkOverlap: 200,
-});
+function wordTokenizer(text, maxWords, overlap) {
+    const words = text.split(/\s+/);
+    const chunks = [];
+    for (let i = 0; i < words.length; i += maxWords - overlap) {
+        chunks.push(words.slice(i, i + maxWords).join(' '));
+    }
+    return chunks;
+}
 export async function initChroma() {
     if (!client) {
         client = new ChromaClient();
@@ -38,13 +41,16 @@ export async function initChroma() {
 }
 export async function addToChroma(texts, metadatas = []) {
     const { collection } = await initChroma();
-    const chunkedTexts = await textSplitter.splitDocuments(texts.map(text => new Document({ pageContent: text, metadata: {} })));
+    const maxWords = 250;
+    const overlapWords = 50;
+    const chunkedTexts = texts.flatMap(text => wordTokenizer(text, maxWords, overlapWords).map(chunk => new Document({ pageContent: chunk, metadata: {} })));
     const ids = chunkedTexts.map((_, i) => `id${i}`);
     const documents = chunkedTexts.map(chunk => chunk.pageContent);
     const expandedMetadatas = chunkedTexts.map((_, index) => ({
         ...metadatas[0],
         chunkIndex: index.toString()
     }));
+    console.log(documents);
     await collection.add({
         ids: ids,
         documents: documents,
@@ -58,5 +64,23 @@ export async function queryChroma(queryText, numResults = 5) {
         nResults: numResults,
     });
     return results;
+}
+export async function deleteAllFromChroma() {
+    const { client } = await initChroma();
+    try {
+        const collections = await client.listCollections();
+        for (const collectionInfo of collections) {
+            await client.deleteCollection({
+                name: collectionInfo.name,
+            });
+            console.log(`Deleted collection: ${collectionInfo.name}`);
+        }
+        console.log("All collections have been deleted from the Chroma server.");
+        collection = null;
+    }
+    catch (error) {
+        console.error("Error deleting collections:", error);
+        throw error;
+    }
 }
 //# sourceMappingURL=chroma-client.js.map
