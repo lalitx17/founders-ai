@@ -1,22 +1,46 @@
-import { initChroma, addToChroma, queryChroma } from "./chroma-client.js";
-import { paulEssays } from "./data/paul_graham_essays.js";
-const google = paulEssays[5].content;
-async function main() {
-    const { client, collection } = await initChroma();
-    console.log('Chroma initialized:', { client, collection });
-    const content = [paulEssays[5].title + paulEssays[5].content];
-    const metadatas = [];
-    const metadataObject = {
-        title: paulEssays[5].title,
-        url: paulEssays[5].url
-    };
-    metadatas.push(metadataObject);
-    await addToChroma(content, metadatas);
-    console.log('Text added to Chroma collection');
-    const queryText = "what advantage does apple had?";
-    const results = await queryChroma(queryText);
-    console.log('Query results:', results);
-    console.log(results.metadatas);
-}
-main().catch(console.error);
+import express from 'express';
+import cors from 'cors';
+import { initChroma, addToChroma, queryChroma, deleteAllFromChroma } from './chroma-client.js';
+const PORT = process.env.PORT || 3005;
+const app = express();
+app.use(cors());
+app.use(express.json());
+initChroma().catch(console.error);
+app.post('/api/embeddings', async (req, res) => {
+    try {
+        const { query } = req.body;
+        const results = await queryChroma(query, 5);
+        res.json({ results });
+    }
+    catch (error) {
+        console.error('Error processing query:', error);
+        res.status(500).json({ error: 'Failed to process query' });
+    }
+});
+app.post('/api/add-documents', async (req, res) => {
+    try {
+        const { texts, metadatas } = req.body;
+        await addToChroma(texts, metadatas);
+        res.json({ message: 'Documents added successfully' });
+    }
+    catch (error) {
+        console.error('Error adding documents:', error);
+        res.status(500).json({ error: 'Failed to add documents' });
+    }
+});
+app.delete('/api/delete-all', async (req, res) => {
+    try {
+        await deleteAllFromChroma();
+        res.json({ message: 'All collections deleted successfully' });
+    }
+    catch (error) {
+        console.error('Error deleting collections:', error);
+        res.status(500).json({ error: 'Failed to delete collections' });
+    }
+});
+app.listen(PORT, (err) => {
+    if (err)
+        throw err;
+    console.log(`> Ready on http://localhost:${PORT}`);
+});
 //# sourceMappingURL=index.js.map

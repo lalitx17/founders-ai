@@ -1,31 +1,97 @@
 "use client"
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+interface MetaDataType {
+  chunkIndex: string;
+  title: string;
+  url: string;
+}
 
 export default function Home() {
-  const [data, setData] = useState();
+  const [query, setQuery] = useState('');
+  const [content, setContent] = useState<string[]>([]);
+  const [metadata, setMetadata] = useState<MetaDataType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('/api/createEmbeddings');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        const result = await response.json();
-        setData(result);
-      } catch (error) {
-        console.error('Error fetching data:', error);
+  const handleSearch = async () => {
+    if (!query.trim()) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/createEmbeddings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
-    };
 
-    fetchData();
-  }, []);
+      const data = await response.json();
+      setContent(data.results.documents[0]);
+      setMetadata(data.results.metadatas[0]);
+    } catch (error) {
+      console.error('Error fetching results:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  if (!data) return <div>Loading...</div>;
+  const truncateContent = (text: string, wordLimit: number) => {
+    const words = text.split(' ');
+    if (words.length > wordLimit) {
+      return words.slice(0, wordLimit).join(' ') + '...';
+    }
+    return text;
+  };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div>{JSON.stringify(data)}</div>
-    </main>
+    <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4">
+      <h1 className="text-3xl font-bold mt-14 mb-4 text-black">Founders-AI</h1>
+      <p className="mb-6 text-gray-700">AI-powered search & chat for Startup Founders.</p>
+      <div className="flex w-full max-w-md">
+        <input
+          type="text"
+          className="flex-grow p-2 border text-black border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Search..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <button
+          className="p-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600 disabled:bg-gray-400"
+          onClick={handleSearch}
+          disabled={isLoading || !query.trim()}
+        >
+          {isLoading ? 'Searching...' : 'Search'}
+        </button>
+      </div>
+      <div className="mt-6 w-full max-w-2xl">
+        {isLoading ? (
+          <p className="text-gray-500 text-center">Loading results...</p>
+        ) : content.length > 0 ? (
+          <div className="space-y-4">
+            {content.map((item, index) => (
+              <div key={index} className="bg-white shadow-md rounded-md p-4">
+                <h2 className="text-xl font-semibold mb-2 text-black">{metadata[index].title}</h2>
+                <p className="text-gray-600 mb-2">{truncateContent(item, 100)}</p>
+                <a 
+                  href={metadata[index].url} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-blue-500 hover:underline"
+                >
+                  Read more
+                </a>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center">No results found.</p>
+        )}
+      </div>
+    </div>
   );
 }
