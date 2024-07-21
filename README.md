@@ -1,4 +1,4 @@
-# AI Startup Advisor
+# Founders-AI
 
 An AI-powered application that provides startup advice using Retrieval-Augmented Generation (RAG).
 
