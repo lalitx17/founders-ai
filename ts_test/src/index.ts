@@ -1,57 +1,35 @@
-// index.ts
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import { initChroma, addToChroma, queryChroma, deleteAllFromChroma } from './chroma-client.js'; // Adjust the import path as necessary
+import { initChroma,addToChroma, queryChroma, deleteAllFromChroma } from "./chroma-client.js";
+import { paulEssays } from "./data/paul_graham_essays.js";
 
-const PORT = process.env.PORT || 3005;
-const app = express();
 
-// Enable CORS for all routes
-app.use(cors());
+const google = paulEssays[5].content;
 
-// Middleware to parse JSON request bodies
-app.use(express.json());
 
-// Initialize Chroma when the server starts
-initChroma().catch(console.error);
 
-// Route to query embeddings
-app.post('/api/embeddings', async (req: Request, res: Response) => {
-  try {
-    const { query } = req.body as { query: string };
-    const results = await queryChroma(query, 5);
-    res.json({ results });
-  } catch (error) {
-    console.error('Error processing query:', error);
-    res.status(500).json({ error: 'Failed to process query' });
-  }
-});
+async function main(){
+    const {client, collection} = await initChroma();
+    console.log('Chroma initialized:', {client, collection});
 
-// Route to add documents to Chroma
-app.post('/api/add-documents', async (req: Request, res: Response) => {
-  try {
-    const { texts, metadatas } = req.body as { texts: string[], metadatas: { [key: string]: string }[] };
-    await addToChroma(texts, metadatas);
-    res.json({ message: 'Documents added successfully' });
-  } catch (error) {
-    console.error('Error adding documents:', error);
-    res.status(500).json({ error: 'Failed to add documents' });
-  }
-});
+    const content = [paulEssays[5].title+paulEssays[5].content];
 
-// Route to delete all collections
-app.delete('/api/delete-all', async (req: Request, res: Response) => {
-  try {
-    await deleteAllFromChroma();
-    res.json({ message: 'All collections deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting collections:', error);
-    res.status(500).json({ error: 'Failed to delete collections' });
-  }
-});
+    const metadatas = [];
+    const metadataObject = {
+        title: paulEssays[5].title,
+        url: paulEssays[5].url
+    };
+    metadatas.push(metadataObject);
+    
 
-// Start the Express server
-app.listen(PORT, (err?: Error) => {
-  if (err) throw err;
-  console.log(`> Ready on http://localhost:${PORT}`);
-});
+    await addToChroma(content, metadatas);
+    console.log('Text added to Chroma collection');
+
+    const queryText = "what advantage does apple had?";
+    const results = await queryChroma(queryText);
+    console.log('Query results:', results);
+    console.log(results.metadatas);
+
+    // await deleteAllFromChroma();
+
+}
+
+main().catch(console.error);

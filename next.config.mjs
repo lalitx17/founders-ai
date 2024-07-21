@@ -9,7 +9,14 @@ const nextConfig = {
           ...config.experiments,
           topLevelAwait: true,
         };
+      }else{
+        config.resolve.fallback.fs = false;
       }
+      config.module.rules.push({
+        test: /\.node$/,
+        use: 'node-loader',
+      });
+      
       return config;
     },
   };

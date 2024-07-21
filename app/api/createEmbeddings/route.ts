@@ -1,44 +1,23 @@
 import { NextResponse } from 'next/server';
+import { initChroma, queryChroma } from '@/lib/chroma-client';
 
 export async function POST(request: Request) {
   try {
-    const { query } = await request.json();
+    await initChroma();
 
+    const { query } = await request.json();
     console.log('Received query:', query);
 
-    // Make a request to the Express server
-    const response = await fetch('http://localhost:3005/api/embeddings', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query }),
-    });
+    const results = await queryChroma(query);
 
-    console.log('Express server response status:', response.status);
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch from Express server: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    console.log("Data received from Express server:", data.results.documents);
-
-    if (!data || !data.results) {
-      console.error("Unexpected data structure from Express server:", data);
-      throw new Error('Unexpected data structure from Express server');
-    }
-
-    const result = { 
-      message: 'Query processed',    
+    const response = {
+      message: 'Query processed successfully',
       query: query,
-      results: data.results
+      results: results
     };
 
-    console.log("Sending response:", result);
-
-    return NextResponse.json(result);
+    console.log("Sending response:", response);
+    return NextResponse.json(response);
 
   } catch (error) {
     console.error('Error processing request:', error);
