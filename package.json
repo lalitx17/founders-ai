@@ -9,12 +9,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@langchain/core": "^0.2.17",
+    "@llama-node/core": "^0.1.6",
+    "@llama-node/llama-cpp": "^0.1.6",
+    "@llama-node/rwkv-cpp": "^0.1.6",
     "@types/chroma-js": "^2.4.4",
     "@types/http-proxy": "^1.17.14",
     "@xenova/transformers": "^2.17.2",
     "chromadb": "^1.8.1",
     "chromadb-default-embed": "^2.13.2",
-    "langchain": "^0.2.9",
+    "langchain": "^0.2.10",
+    "llama-node": "^0.1.6",
     "next": "14.2.4",
     "react": "^18",
     "react-dom": "^18"
