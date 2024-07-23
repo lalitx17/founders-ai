@@ -22,14 +22,15 @@ export async function POST(request: Request) {
 
 
     console.log(`You: ${query}`);
-    const reply = await model.invoke(query);
-    console.log(`AI: ${reply}`)
+    const AI = await model.invoke(query);
+    console.log(`AI: ${AI}`)
 
 
     const response = {
       message: 'Query processed successfully',
       query: query,
-      results: results
+      results: results, 
+      modelResponse: AI
     };
 
     console.log("Sending response:", response);

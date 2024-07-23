@@ -11,7 +11,7 @@ An AI-powered application that provides startup advice using Retrieval-Augmented
 - **Vector Databases**:
   - Local: Chroma
   - Remote: Pinecone
-- **Language Model**: Yet to choose.(*prolly the cheapest one*)
+- **Language Model**: Llama-2-7B(Locally)
 
 ## Features
 
