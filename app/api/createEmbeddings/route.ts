@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { initChroma, queryChroma } from '@/lib/chroma-client';
+import { LlamaCpp } from "@langchain/community/llms/llama_cpp";
+
+const llamaPath = "/home/lalit/models/llama-2-7b.Q6_K.gguf";
 
 export async function POST(request: Request) {
   try {
@@ -9,6 +12,19 @@ export async function POST(request: Request) {
     console.log('Received query:', query);
 
     const results = await queryChroma(query);
+
+    const model = new LlamaCpp({
+      modelPath: llamaPath,
+      temperature: 0.7,
+      maxTokens: 2000,
+      topP: 1,
+    });
+
+
+    console.log(`You: ${query}`);
+    const reply = await model.invoke(query);
+    console.log(`AI: ${reply}`)
+
 
     const response = {
       message: 'Query processed successfully',

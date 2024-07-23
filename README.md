@@ -43,6 +43,12 @@ npm install
 sudo docker run -p 8000:8000 chromadb/chroma
 ```
 
+3. Download a local llama Models(.gguf required)
+```
+huggingface-cli login
+huggingface-cli download TheBloke/Llama-2-7B-GGUF llama-2-7b.Q6_K.gguf --local-dir ./models
+```
+
 4. Create a `.env` file in the root directory and add your API keys:
 ```
 OPENAI_API_KEY=your_openai_api_key
