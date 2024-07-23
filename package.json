@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@langchain/community": "^0.2.20",
     "@langchain/core": "^0.2.17",
     "@llama-node/core": "^0.1.6",
     "@llama-node/llama-cpp": "^0.1.6",
@@ -20,7 +21,9 @@
     "chromadb-default-embed": "^2.13.2",
     "langchain": "^0.2.10",
     "llama-node": "^0.1.6",
+    "modelfusion": "^0.137.0",
     "next": "14.2.4",
+    "node-llama-cpp": "^2.8.12",
     "react": "^18",
     "react-dom": "^18"
   },
