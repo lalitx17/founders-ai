@@ -1,17 +1,16 @@
 import { NextResponse } from 'next/server';
-import { initChroma, queryChroma } from '@/lib/chroma-client';
+import { queryAllCollections } from '@/lib/chroma-client';
 import { LlamaCpp } from "@langchain/community/llms/llama_cpp";
 
 const llamaPath = "/home/lalit/models/llama-2-7b.Q6_K.gguf";
 
 export async function POST(request: Request) {
   try {
-    await initChroma();
 
     const { query } = await request.json();
     console.log('Received query:', query);
 
-    const results = await queryChroma(query);
+    const results = await queryAllCollections(query);
 
     const model = new LlamaCpp({
       modelPath: llamaPath,
