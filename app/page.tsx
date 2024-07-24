@@ -19,7 +19,7 @@ export default function Home() {
     if (!query.trim()) return;
     setIsLoading(true);
     try {
-      const response = await fetch('/api/createEmbeddings', {
+      const response = await fetch('/api/modelResponse', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -30,8 +30,8 @@ export default function Home() {
         throw new Error('Network response was not ok');
       }
       const data = await response.json();
-      setContent(data.results.documents[0]);
-      setMetadata(data.results.metadatas[0]);
+      setContent(data.content);
+      setMetadata(data.metadata);
       setAIresponse(data.modelResponse);
     } catch (error) {
       console.error('Error fetching results:', error);
