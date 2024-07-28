@@ -10,18 +10,21 @@ async function main(){
     const {client, collection} = await initChroma();
     console.log('Chroma initialized:', {client, collection});
 
-    const content = [paulEssays[5].title+paulEssays[5].content];
+    
+    for (let i = 0; i < 225; i++){
+    const content = [paulEssays[i].title+paulEssays[i].content];
 
     const metadatas = [];
     const metadataObject = {
-        title: paulEssays[5].title,
-        url: paulEssays[5].url
+        title: paulEssays[i].title,
+        url: paulEssays[i].url
     };
     metadatas.push(metadataObject);
     
 
     await addToChroma(content, metadatas);
-    console.log(paulEssays[5].title+'essay no. ${i} added');
+    console.log(i+" essays added.");
+}
 
     // const queryText = "what advantage does apple had?";
     // const results = await queryChroma(queryText);

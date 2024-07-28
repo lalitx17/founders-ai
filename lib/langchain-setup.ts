@@ -16,6 +16,7 @@ async function initChroma(collectionName: string) {
   return await Chroma.fromExistingCollection(embeddings, { collectionName });
 }
 
+
 async function getAllDocumentsFromCollection(store: Chroma): Promise<Document[]> {
   const result = await store.similaritySearch("", 10000);
   return result;

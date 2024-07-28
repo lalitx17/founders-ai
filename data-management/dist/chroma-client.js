@@ -57,7 +57,7 @@ export async function addToChroma(texts, metadatas = []) {
         metadatas: expandedMetadatas,
     });
 }
-export async function queryChroma(queryText, numResults = 5) {
+export async function queryChroma(queryText, numResults = 10) {
     const { collection } = await initChroma();
     const results = await collection.query({
         queryTexts: [queryText],

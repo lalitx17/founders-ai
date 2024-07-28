@@ -7,6 +7,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Founders-ai",
   description: "Builder's source of wisdom",
+  icons:{
+    icon: '/images/rocket.png'
+  }
 };
 
 export default function RootLayout({
