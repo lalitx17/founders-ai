@@ -1,5 +1,3 @@
-// langchain-setup.ts
-
 import { LlamaCpp } from "@langchain/community/llms/llama_cpp";
 import { HuggingFaceTransformersEmbeddings } from "@langchain/community/embeddings/hf_transformers";
 import { Chroma } from "@langchain/community/vectorstores/chroma";
@@ -8,7 +6,7 @@ import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
 import { createRetrievalChain } from "langchain/chains/retrieval";
 import { Document } from "langchain/document";
 
-const llamaPath = "/home/lalit/models/llama-2-7b.Q6_K.gguf";
+const llamaPath = "/home/lalit/models/Meta-Llama-3.1-8B-Instruct-Q8_0.gguf";
 
 const embeddings = new HuggingFaceTransformersEmbeddings({
   modelName: "Xenova/all-MiniLM-L6-v2",
@@ -19,16 +17,12 @@ async function initChroma(collectionName: string) {
 }
 
 async function getAllDocumentsFromCollection(store: Chroma): Promise<Document[]> {
-  // This function attempts to retrieve all documents from a collection
-  // We use a large number for k to try and get all documents
-  // You may need to adjust this based on your collection size
   const result = await store.similaritySearch("", 10000);
   return result;
 }
 
 async function setupChain() {
-  // Initialize Chroma client for all collections
-  const collections = ["paul_graham_essays"]; // Add more collection names as needed
+  const collections = ["paul_graham_essays"];
   const vectorStores = await Promise.all(
     collections.map(collectionName => initChroma(collectionName))
   );
@@ -52,7 +46,7 @@ async function setupChain() {
     modelPath: llamaPath,
     temperature: 0.7,
     maxTokens: 2000,
-    topP: 1,
+    topP: 0.3,
     contextSize: 4096,
   });
 

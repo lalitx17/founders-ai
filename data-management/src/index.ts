@@ -21,12 +21,12 @@ async function main(){
     
 
     await addToChroma(content, metadatas);
-    console.log('Text added to Chroma collection');
+    console.log(paulEssays[5].title+'essay no. ${i} added');
 
-    const queryText = "what advantage does apple had?";
-    const results = await queryChroma(queryText);
-    console.log('Query results:', results);
-    console.log(results.metadatas);
+    // const queryText = "what advantage does apple had?";
+    // const results = await queryChroma(queryText);
+    // console.log('Query results:', results);
+    // console.log(results.metadatas);
 
     // await deleteAllFromChroma();
 

@@ -11,7 +11,7 @@ An AI-powered application that provides startup advice using Retrieval-Augmented
 - **Vector Databases**:
   - Local: Chroma
   - Remote: Pinecone
-- **Language Model**: Llama-2-7B(Locally)
+- **Language Model**: [Meta-Llama-3.1-8B-Instruct-Q8_0.gguf](https://huggingface.co/lmstudio-community/Meta-Llama-3.1-8B-Instruct-GGUF/tree/main)
 
 ## Features
 
