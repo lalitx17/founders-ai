@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "Founders-ai",
   description: "Builder's source of wisdom",
   icons:{
-    icon: '/images/rocket.png'
+    icon: '/images/startup.png'
   }
 };
 

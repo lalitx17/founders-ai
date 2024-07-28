@@ -19,25 +19,41 @@ async function initChroma(collectionName: string) {
 
 async function getAllDocumentsFromCollection(store: Chroma): Promise<Document[]> {
   const result = await store.similaritySearch("", 10000);
+  console.log(result);
   return result;
 }
 
-async function setupChain() {
+async function setupChain(query: string) {
   const collections = ["paul_graham_essays"];
   const vectorStores = await Promise.all(
     collections.map(collectionName => initChroma(collectionName))
   );
 
-  // Combine all documents from different collections
   let allDocuments: Document[] = [];
   for (const store of vectorStores) {
     const docs = await getAllDocumentsFromCollection(store);
     allDocuments = allDocuments.concat(docs);
   }
 
-  // Create a new combined vector store
-  const combinedVectorStore = await Chroma.fromDocuments(
+  // Create a temporary Chroma instance with all documents
+  const tempVectorStore = await Chroma.fromDocuments(
     allDocuments,
+    embeddings,
+    { collectionName: "temp_collection" }
+  );
+
+  // Perform similarity search on all documents
+  const searchResults = await tempVectorStore.similaritySearchWithScore(query, allDocuments.length);
+
+  // Sort by similarity score (descending) and take top 50
+  const topDocuments = searchResults
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 100)
+    .map(item => item[0]);
+
+  // Create a new combined vector store with top 50 documents
+  const combinedVectorStore = await Chroma.fromDocuments(
+    topDocuments,
     embeddings,
     { collectionName: "combined_collection" }
   );
@@ -81,8 +97,10 @@ Please provide a detailed and comprehensive answer:
   return retrievalChain;
 }
 
+
+
 export async function queryChain(query: string) {
-  const chain = await setupChain();
+  const chain = await setupChain(query);
   const response = await chain.invoke({ input: query, question: query });
   
   return {
