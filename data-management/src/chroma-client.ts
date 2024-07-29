@@ -1,4 +1,4 @@
-import { ChromaClient, Collection, IEmbeddingFunction, Metadata } from "chromadb";
+import { ChromaClient, Collection, IEmbeddingFunction, IncludeEnum, Metadata } from "chromadb";
 import { Document } from "langchain/document";
 
 let client: ChromaClient | null = null;
@@ -21,7 +21,6 @@ function wordTokenizer(text: string, maxWords: number, overlap: number): string[
   for (let i = 0; i < words.length; i += maxWords - overlap) {
     chunks.push(words.slice(i, i + maxWords).join(' '));
   }
-  
   return chunks;
 }
 
@@ -48,29 +47,33 @@ export async function initChroma() {
 
 export async function addToChroma(texts: string[], metadatas: { [key: string]: string }[] = []) {
   const { collection } = await initChroma();
+  const maxWords = 250;
+  const overlapWords = 50;
   
-  const maxWords = 250; 
-  const overlapWords = 50; 
+  let globalChunkIndex = 0;
+  for (let textIndex = 0; textIndex < texts.length; textIndex++) {
+    const text = texts[textIndex];
+    const chunks = wordTokenizer(text, maxWords, overlapWords);
+    console.log(`Essay ${textIndex + 1} split into ${chunks.length} chunks`);
+
+    const ids = chunks.map((_, i) => `essay${textIndex}_chunk${i}`);
+    const documents = chunks;
+    const expandedMetadatas = chunks.map((_, index) => ({
+      ...metadatas[textIndex],
+      chunkIndex: (globalChunkIndex + index).toString(),
+      totalChunks: chunks.length.toString()
+    }));
+
+    await collection.add({
+      ids: ids,
+      documents: documents,
+      metadatas: expandedMetadatas,
+    });
+
+    globalChunkIndex += chunks.length;
+  }
   
-  const chunkedTexts = texts.flatMap(text => 
-    wordTokenizer(text, maxWords, overlapWords).map(chunk => new Document({ pageContent: chunk, metadata: {} }))
-  );
-
-  
-  const ids = chunkedTexts.map((_, i) => `id${i}`);
-  const documents = chunkedTexts.map(chunk => chunk.pageContent);
-  const expandedMetadatas = chunkedTexts.map((_, index) => ({
-    ...metadatas[0],
-    chunkIndex: index.toString()
-  }));
-
-  console.log(documents);
-
-  await collection.add({
-    ids: ids,
-    documents: documents,
-    metadatas: expandedMetadatas,
-  });
+  console.log(`Total chunks added: ${globalChunkIndex}`);
 }
 
 export async function queryChroma(queryText: string, numResults = 10) {
@@ -96,6 +99,30 @@ export async function deleteAllFromChroma() {
     collection = null;
   } catch (error) {
     console.error("Error deleting collections:", error);
+    throw error;
+  }
+}
+
+export async function getAllFromChroma() {
+  const { collection } = await initChroma();
+  if (!collection) {
+    throw new Error("Collection not initialized");
+  }
+  try {
+    const count = await collection.count();
+    console.log(`Total documents in collection: ${count}`);
+    const allDocs = await collection.get({
+      limit: count,
+      include: [IncludeEnum.Documents, IncludeEnum.Metadatas, IncludeEnum.Embeddings]
+    });
+    return {
+      ids: allDocs.ids,
+      documents: allDocs.documents,
+      metadatas: allDocs.metadatas,
+      embeddings: allDocs.embeddings
+    };
+  } catch (error) {
+    console.error('Error getting all documents from Chroma:', error);
     throw error;
   }
 }
