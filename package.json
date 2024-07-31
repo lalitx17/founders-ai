@@ -29,9 +29,11 @@
     "react-markdown": "^9.0.1"
   },
   "devDependencies": {
+    "@types/hast": "^3.0.4",
     "@types/node": "^20.14.11",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/unist": "^3.0.2",
     "eslint": "^8",
     "eslint-config-next": "14.2.4",
     "node-loader": "^2.0.0",

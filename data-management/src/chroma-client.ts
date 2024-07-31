@@ -49,14 +49,15 @@ export async function addToChroma(texts: string[], metadatas: { [key: string]: s
   const { collection } = await initChroma();
   const maxWords = 250;
   const overlapWords = 50;
+  const sanitizedTitle = metadatas[0].title.replace(/\s+/g, '_').toLowerCase();
   
   let globalChunkIndex = 0;
   for (let textIndex = 0; textIndex < texts.length; textIndex++) {
     const text = texts[textIndex];
     const chunks = wordTokenizer(text, maxWords, overlapWords);
-    console.log(`Essay ${textIndex + 1} split into ${chunks.length} chunks`);
+    console.log(`Essay ${sanitizedTitle} split into ${chunks.length} chunks`);
 
-    const ids = chunks.map((_, i) => `essay${textIndex}_chunk${i}`);
+    const ids = chunks.map((_, i) => `essay${sanitizedTitle}_chunk${i}`);
     const documents = chunks;
     const expandedMetadatas = chunks.map((_, index) => ({
       ...metadatas[textIndex],
@@ -70,7 +71,7 @@ export async function addToChroma(texts: string[], metadatas: { [key: string]: s
       metadatas: expandedMetadatas,
     });
 
-    globalChunkIndex += chunks.length;
+    globalChunkIndex += chunks.length+1;
   }
   
   console.log(`Total chunks added: ${globalChunkIndex}`);

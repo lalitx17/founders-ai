@@ -17,8 +17,8 @@ async function initChroma(collectionName: string) {
 }
 
 
-async function getAllDocumentsFromCollection(store: Chroma): Promise<Document[]> {
-  const result = await store.similaritySearch("", 10000);
+async function getAllDocumentsFromCollection(query: string, store: Chroma): Promise<Document[]> {
+  const result = await store.similaritySearch(query, 10);
   console.log(result);
   return result;
 }
@@ -31,7 +31,7 @@ async function setupChain(query: string) {
 
   let allDocuments: Document[] = [];
   for (const store of vectorStores) {
-    const docs = await getAllDocumentsFromCollection(store);
+    const docs = await getAllDocumentsFromCollection(query, store);
     allDocuments = allDocuments.concat(docs);
   }
 
@@ -45,10 +45,10 @@ async function setupChain(query: string) {
   // Perform similarity search on all documents
   const searchResults = await tempVectorStore.similaritySearchWithScore(query, allDocuments.length);
 
-  // Sort by similarity score (descending) and take top 50
+
   const topDocuments = searchResults
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 100)
+    .slice(0, 10)
     .map(item => item[0]);
 
   // Create a new combined vector store with top 50 documents
