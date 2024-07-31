@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react";
+import ReactMarkdown from 'react-markdown';
 
 interface MetaDataType {
   chunkIndex: string;
@@ -77,8 +78,10 @@ export default function Home() {
           <>
             {AIresponse && (
               <div className="bg-white shadow-md rounded-md p-4 mb-6">
-                <h2 className="text-xl font-semibold mb-2 text-black">AI</h2>
-                <p className="text-gray-600">{AIresponse}</p>
+                <h2 className="text-xl font-semibold mb-2 text-black">AI Response</h2>
+                <div className="text-gray-600 prose">
+                  <ReactMarkdown>{AIresponse}</ReactMarkdown>
+                </div>
               </div>
             )}
             

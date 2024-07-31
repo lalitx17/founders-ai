@@ -2,8 +2,6 @@ import { initChroma,addToChroma, queryChroma, deleteAllFromChroma, getAllFromChr
 import { paulEssays } from "./data/paul_graham_essays.js";
 
 
-const google = paulEssays[5].content;
-
 
 
 async function main(){
@@ -11,27 +9,27 @@ async function main(){
     console.log('Chroma initialized:', {client, collection});
 
     
-//     for (let i = 0; i < paulEssays.length; i++){
-//     const content = [paulEssays[i].title+paulEssays[i].content];
+    for (let i = 0; i < paulEssays.length; i++){
+    const content = [paulEssays[i].title+paulEssays[i].content];
 
-//     const metadatas = [];
-//     const metadataObject = {
-//         title: paulEssays[i].title,
-//         url: paulEssays[i].url
-//     };
-//     metadatas.push(metadataObject);
+    const metadatas = [];
+    const metadataObject = {
+        title: paulEssays[i].title,
+        url: paulEssays[i].url
+    };
+    metadatas.push(metadataObject);
     
 
-//     await addToChroma(content, metadatas);
+    await addToChroma(content, metadatas);
    
-// }
+}
 
-    // const queryText = "what advantage does apple had?";
-    // const results = await queryChroma(queryText);
-    // console.log('Query results:', results);
-    // console.log(results.metadatas);
+    const queryText = "what advantage does apple had?";
+    const results = await queryChroma(queryText);
+    console.log('Query results:', results);
+    console.log(results.metadatas);
 
-    // await deleteAllFromChroma();
+    await deleteAllFromChroma();
 
     const allDocs = await getAllFromChroma();
   console.log('Total documents:', allDocs.ids.length);
