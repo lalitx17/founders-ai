@@ -16,8 +16,10 @@ async function initChroma(collectionName: string) {
   return await Chroma.fromExistingCollection(embeddings, { collectionName });
 }
 
-
-async function getAllDocumentsFromCollection(query: string, store: Chroma): Promise<Document[]> {
+async function getAllDocumentsFromCollection(
+  query: string,
+  store: Chroma,
+): Promise<Document[]> {
   const result = await store.similaritySearch(query, 10);
   console.log(result);
   return result;
@@ -26,7 +28,7 @@ async function getAllDocumentsFromCollection(query: string, store: Chroma): Prom
 async function setupChain(query: string) {
   const collections = ["paul_graham_essays"];
   const vectorStores = await Promise.all(
-    collections.map(collectionName => initChroma(collectionName))
+    collections.map((collectionName) => initChroma(collectionName)),
   );
 
   let allDocuments: Document[] = [];
@@ -36,26 +38,26 @@ async function setupChain(query: string) {
   }
 
   // Create a temporary Chroma instance with all documents
-  const tempVectorStore = await Chroma.fromDocuments(
-    allDocuments,
-    embeddings,
-    { collectionName: "temp_collection" }
-  );
+  const tempVectorStore = await Chroma.fromDocuments(allDocuments, embeddings, {
+    collectionName: "temp_collection",
+  });
 
   // Perform similarity search on all documents
-  const searchResults = await tempVectorStore.similaritySearchWithScore(query, allDocuments.length);
-
+  const searchResults = await tempVectorStore.similaritySearchWithScore(
+    query,
+    allDocuments.length,
+  );
 
   const topDocuments = searchResults
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
-    .map(item => item[0]);
+    .map((item) => item[0]);
 
   // Create a new combined vector store with top 50 documents
   const combinedVectorStore = await Chroma.fromDocuments(
     topDocuments,
     embeddings,
-    { collectionName: "combined_collection" }
+    { collectionName: "combined_collection" },
   );
 
   // Initialize LLaMa model
@@ -69,7 +71,7 @@ async function setupChain(query: string) {
 
   // Create a custom prompt template
   const prompt = ChatPromptTemplate.fromTemplate(`
-Use the following pieces of context to answer the question at the end. 
+Use the following pieces of context to answer the question at the end.
 If you don't know the answer, just say that you don't know, don't try to make up an answer.
 
 Context: {context}
@@ -97,12 +99,10 @@ Please provide a detailed and comprehensive answer:
   return retrievalChain;
 }
 
-
-
-export async function queryChain(query: string) {
+export async function queryLlamaChain(query: string) {
   const chain = await setupChain(query);
   const response = await chain.invoke({ input: query, question: query });
-  
+
   return {
     text: response.answer,
     sourceDocuments: response.context,

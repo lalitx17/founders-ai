@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
-import { queryChain } from "@/lib/claude";
+import { queryClaudeChain } from "@/lib/claude";
+import { queryLlamaChain } from "@/lib/llama";
 
 export async function POST(request: Request) {
   try {
-    const { query } = await request.json();
+    const { query, model } = await request.json();
     console.log("Received query:", query);
+    console.log("Selected model:", model);
 
-    const response = await queryChain(query);
+    let response;
+    if (model === "claude") {
+      response = await queryClaudeChain(query);
+    } else {
+      response = await queryLlamaChain(query);
+    }
 
     const pageContentArray = response.sourceDocuments.map(
       (doc) => doc.pageContent,
