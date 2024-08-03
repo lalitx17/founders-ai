@@ -19,8 +19,12 @@ async function initChroma(collectionName: string) {
 async function getAllDocumentsFromCollection(
   query: string,
   store: Chroma,
-): Promise<Document[]> {
-  const result = await store.similaritySearch(query, 10);
+): Promise<[Document, number][]> {
+  const queryVector = await embeddings.embedQuery(query);
+  const result = await store.similaritySearchVectorWithScore(
+    queryVector,
+    100000,
+  );
   console.log(result);
   return result;
 }
@@ -31,33 +35,30 @@ async function setupChain(query: string) {
     collections.map((collectionName) => initChroma(collectionName)),
   );
 
-  let allDocuments: Document[] = [];
+  let allDocumentsWithScores: [Document, number][] = [];
   for (const store of vectorStores) {
-    const docs = await getAllDocumentsFromCollection(query, store);
-    allDocuments = allDocuments.concat(docs);
+    const docsWithScores = await getAllDocumentsFromCollection(query, store);
+    allDocumentsWithScores = allDocumentsWithScores.concat(docsWithScores);
   }
 
-  // Create a temporary Chroma instance with all documents
-  const tempVectorStore = await Chroma.fromDocuments(allDocuments, embeddings, {
-    collectionName: "temp_collection",
-  });
+  // Sort all documents by similarity score in descending order
+  allDocumentsWithScores.sort((a, b) => b[1] - a[1]);
 
-  // Perform similarity search on all documents
-  const searchResults = await tempVectorStore.similaritySearchWithScore(
-    query,
-    allDocuments.length,
+  console.log(
+    "All documents with scores (sorted):",
+    allDocumentsWithScores.slice(0, 10),
   );
 
-  const topDocuments = searchResults
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-    .map((item) => item[0]);
+  // Take top 10 documents
+  const topDocuments = allDocumentsWithScores.slice(0, 10).map(([doc]) => doc);
 
-  // Create a new combined vector store with top 50 documents
+  const combinedCollectionName = `combined_collection_${Date.now()}`;
+
+  // Create a new combined vector store with top 10 documents
   const combinedVectorStore = await Chroma.fromDocuments(
     topDocuments,
     embeddings,
-    { collectionName: "combined_collection" },
+    { collectionName: combinedCollectionName },
   );
 
   // Initialize LLaMa model
@@ -73,11 +74,8 @@ async function setupChain(query: string) {
   const prompt = ChatPromptTemplate.fromTemplate(`
 Use the following pieces of context to answer the question at the end.
 If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
 Context: {context}
-
 Question: {question}
-
 Please provide a detailed and comprehensive answer:
   `);
 
@@ -102,7 +100,6 @@ Please provide a detailed and comprehensive answer:
 export async function queryLlamaChain(query: string) {
   const chain = await setupChain(query);
   const response = await chain.invoke({ input: query, question: query });
-
   return {
     text: response.answer,
     sourceDocuments: response.context,

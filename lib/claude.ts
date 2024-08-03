@@ -20,8 +20,8 @@ async function initChroma(collectionName: string) {
 async function getAllDocumentsFromCollection(
   query: string,
   store: Chroma,
-): Promise<Document[]> {
-  const result = await store.similaritySearch(query, 10);
+): Promise<[Document, number][]> {
+  const result = await store.similaritySearchWithScore(query, 100000);
   console.log(result);
   return result;
 }
@@ -31,32 +31,24 @@ async function setupChain(query: string) {
   const vectorStores = await Promise.all(
     collections.map((collectionName) => initChroma(collectionName)),
   );
-  let allDocuments: Document[] = [];
+  let allDocumentswithScores: [Document, number][] = [];
   for (const store of vectorStores) {
-    const docs = await getAllDocumentsFromCollection(query, store);
-    allDocuments = allDocuments.concat(docs);
+    const docsWithScores = await getAllDocumentsFromCollection(query, store);
+    allDocumentswithScores = allDocumentswithScores.concat(docsWithScores);
   }
 
-  // Create a temporary Chroma instance with all documents
-  const tempVectorStore = await Chroma.fromDocuments(allDocuments, embeddings, {
-    collectionName: "temp_collection",
-  });
+  allDocumentswithScores.sort((a, b) => b[1] - a[1]);
 
-  // Perform similarity search on all documents
-  const searchResults = await tempVectorStore.similaritySearchWithScore(
-    query,
-    allDocuments.length,
-  );
-  const topDocuments = searchResults
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-    .map((item) => item[0]);
+  console.log("All documents with scores (sorted):", allDocumentswithScores);
 
-  // Create a new combined vector store with top 10 documents
+  const topDocuments = allDocumentswithScores.slice(0, 10).map(([doc]) => doc);
+
+  const combinedCollectionName = `combined_collection_${Date.now()}`;
+
   const combinedVectorStore = await Chroma.fromDocuments(
     topDocuments,
     embeddings,
-    { collectionName: "combined_collection" },
+    { collectionName: combinedCollectionName },
   );
 
   // Initialize Claude 3.5 Sonnet model
