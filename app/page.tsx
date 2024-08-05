@@ -16,7 +16,7 @@ export default function Home() {
   const [AIresponse, setAIresponse] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState("llama");
-
+  const [selectedEmbedding, setSelectedEmbedding] = useState("huggingface");
   const handleSearch = async () => {
     if (!query.trim()) return;
     setIsLoading(true);
@@ -26,7 +26,11 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ query, model: selectedModel }),
+        body: JSON.stringify({
+          query,
+          model: selectedModel,
+          embeddings: selectedEmbedding,
+        }),
       });
       if (!response.ok) {
         throw new Error("Network response was not ok");
@@ -77,6 +81,15 @@ export default function Home() {
         >
           <option value="llama">Llama</option>
           <option value="claude">Claude</option>
+        </select>
+
+        <select
+          className="p-2 border text-black border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={selectedEmbedding}
+          onChange={(e) => setSelectedEmbedding(e.target.value)}
+        >
+          <option value="huggingface">HuggingFace</option>
+          <option value="ada">OpenAI Ada</option>
         </select>
 
         <input
