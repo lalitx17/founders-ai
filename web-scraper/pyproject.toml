@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "web-scraper2"
+version = "0.1.0"
+description = ""
+authors = ["Lalit Yadav <lalityadav.x17@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

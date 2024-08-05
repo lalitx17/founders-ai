@@ -36,7 +36,7 @@ async function getAllDocumentsFromCollection(
     queryVector,
     100000,
   );
-  console.log(result);
+  // console.log(result);
   return result;
 }
 
@@ -60,10 +60,10 @@ async function setupChain(query: string, embeddingType: string) {
   // Sort all documents by similarity score in descending order
   allDocumentsWithScores.sort((a, b) => b[1] - a[1]);
 
-  console.log(
-    "All documents with scores (sorted):",
-    allDocumentsWithScores.slice(0, 10),
-  );
+  // console.log(
+  //   "All documents with scores (sorted):",
+  //   allDocumentsWithScores.slice(0, 10),
+  // );
 
   // Take top 10 documents
   const topDocuments = allDocumentsWithScores.slice(0, 10).map(([doc]) => doc);
