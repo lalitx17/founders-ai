@@ -4,16 +4,16 @@ import { queryLlamaChain } from "@/lib/llama";
 
 export async function POST(request: Request) {
   try {
-    const { query, model, embedding } = await request.json();
+    const { query, model, embeddings } = await request.json();
     console.log("Received query:", query);
     console.log("Selected model:", model);
-    console.log("Selected embedding:", embedding);
+    console.log("Selected embedding:", embeddings);
 
     let response;
     if (model === "claude") {
       response = await queryClaudeChain(query);
     } else {
-      response = await queryLlamaChain(query, embedding);
+      response = await queryLlamaChain(query, embeddings);
     }
 
     const pageContentArray = response.sourceDocuments.map(
