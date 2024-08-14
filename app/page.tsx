@@ -17,6 +17,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedModel, setSelectedModel] = useState("llama");
   const [selectedEmbedding, setSelectedEmbedding] = useState("huggingface");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const handleSearch = async () => {
     if (!query.trim()) return;
     setIsLoading(true);
@@ -66,6 +68,8 @@ export default function Home() {
     }
   };
 
+  const toggleDialog = () => setIsDialogOpen(!isDialogOpen);
+
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4">
       <h1 className="text-3xl font-bold mt-14 mb-4 text-black">Founders-AI</h1>
@@ -73,25 +77,53 @@ export default function Home() {
         AI-powered search & chat for Startup Founders.
       </p>
 
+      {/* Settings Button */}
+      <button
+        onClick={toggleDialog}
+        className="absolute top-4 right-4 p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+      >
+        Settings
+      </button>
+
+      {/* Settings Dialog */}
+      {/* Settings Dialog */}
+      {isDialogOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-4 shadow-md rounded-md w-1/3 relative">
+            <h2 className="text-lg text-black font-semibold mb-4">Settings</h2>
+            <button
+              onClick={toggleDialog}
+              className="absolute top-5 right-5 text-gray-600 hover:text-gray-800"
+            >
+              X
+            </button>
+            <div className="mb-4">
+              <h3 className="text-md font-semibold mb-2">Choose Model</h3>
+              <select
+                className="w-full p-2 border text-black border-gray-300 rounded-md"
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+              >
+                <option value="llama">Llama</option>
+                <option value="claude">Claude</option>
+              </select>
+            </div>
+            <div>
+              <h3 className="text-md font-semibold mb-2">Choose Embedding</h3>
+              <select
+                className="w-full p-2 border text-black border-gray-300 rounded-md"
+                value={selectedEmbedding}
+                onChange={(e) => setSelectedEmbedding(e.target.value)}
+              >
+                <option value="huggingface">HuggingFace</option>
+                <option value="ada">OpenAI Ada</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex w-full max-w-lg">
-        <select
-          className="p-2 border text-black border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={selectedModel}
-          onChange={(e) => setSelectedModel(e.target.value)}
-        >
-          <option value="llama">Llama</option>
-          <option value="claude">Claude</option>
-        </select>
-
-        <select
-          className="p-2 border text-black border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={selectedEmbedding}
-          onChange={(e) => setSelectedEmbedding(e.target.value)}
-        >
-          <option value="huggingface">HuggingFace</option>
-          <option value="ada">OpenAI Ada</option>
-        </select>
-
         <input
           type="text"
           className="flex-grow p-2 border text-black border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
